@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Button, Stack, TextField } from "@mui/material";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function Home() {
   const [messages, setMessages] = useState([
@@ -13,6 +13,7 @@ export default function Home() {
   ]);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
   // This asynchronous function is called when the user sends a message.
   // It handles updating the chat UI and sending the message to the server
@@ -80,6 +81,15 @@ export default function Home() {
     }
   };
 
+  // Add auto scrolling to the chat so that the most recent messages are always visible.
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   return (
     <Box
       width="100vw"
@@ -93,6 +103,9 @@ export default function Home() {
         direction={"column"}
         width="500px"
         height="700px"
+        sx={{
+          backgroundColor: "#1B1B1B",
+        }}
         border="1px solid black"
         p={2}
         spacing={3}
@@ -126,14 +139,39 @@ export default function Home() {
               </Box>
             </Box>
           ))}
+          <div ref={messagesEndRef} />
         </Stack>
         <Stack direction={"row"} spacing={2}>
           <TextField
             label="Message"
+            sx={{
+              backgroundColor: "#1B1B1B",
+              "& .MuiInputBase-input": {
+                color: "#FFFFFF", // Text color inside the input field
+              },
+              "& .MuiFormLabel-root": {
+                color: "#FFFFFF", // Color of the label
+              },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "#FFFFFF", // Border color when not focused
+                },
+                "&:hover fieldset": {
+                  borderColor: "#FFFFFF", // Border color on hover
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#FFFFFF", // Border color when focused
+                },
+              },
+            }}
             fullWidth
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                sendMessage();
+              }
+            }}
             disabled={isLoading}
           />
           <Button

@@ -24,12 +24,13 @@ export async function POST(req) {
   // making it possible to process large chunks of data incrementally as they are received,
   // rather than waiting for the entire data set to be available
   const stream = new ReadableStream({
+    // controller is an object provided by the ReadableStream API that allows you to control the flow of the stream, e.g. add a chunk of data to stream or close the stream 
     async start(controller) {
       const encoder = new TextEncoder(); // Create a TextEncoder to convert strings to Uint8Array
       try {
         // Iterate over the streamed chunks of the response
         for await (const chunk of completion) {
-          const content = chunk.choices[0]?.delta?.content; // Extract the content from the chunk
+          const content = chunk.choices[0]?.delta?.content; // Extract the generated content from each chunk.
           if (content) {
             const text = encoder.encode(content); // Encode the content to Uint8Array
             controller.enqueue(text); // Enqueue the encoded text to the stream
